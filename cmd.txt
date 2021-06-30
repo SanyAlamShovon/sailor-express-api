@@ -1,0 +1,2 @@
+cp /var/www/sailor-api/sailor-express-api/data/locations.json 
+    /var/www/webapp/sailors/node_modules/@bangladeshi/bangladesh-address/build/json/
