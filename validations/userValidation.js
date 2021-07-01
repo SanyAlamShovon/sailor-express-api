@@ -21,6 +21,22 @@ const blockUser = {
     })
 }
 
+const phone = {
+    params : Joi.object().keys({
+        phone : Joi.string().required()
+    })
+}
+
+
+
+
+const auth = {
+    params : Joi.object().keys({
+        phone : Joi.string().required(),
+        otp : Joi.string().required()
+    })
+}
+
 const signin = {
     body : Joi.object().keys({
         phone : Joi.string().required(),
@@ -32,5 +48,7 @@ const signin = {
 module.exports = {
     signup,
     blockUser,
-    signin
+    signin,
+    phone,
+    auth
 }
