@@ -47,7 +47,7 @@ const transporter = nodemailer.createTransport({
 
 const allAdmin = async (req, res) => {
     try {
-        let data = await adminModel.find({}, projection).sort({ createdAt: -1 });
+        let data = await adminModel.find({role:req.params.role}, projection).sort({ createdAt: -1 });
         res.status(200).json({
             data: data,
             success: true
@@ -120,8 +120,17 @@ const createAdmin = async (req, res) => {
                     req.body.uniqueId = unique;
                     adminRole="division "+adminRole;
                 }
-            }else{
+            }else if(req.body.role=="admin"){
                 let  count = await adminModel.countDocuments({ role: "admin"});
+                count = count+1;
+                let idPrefix = "50105";
+                let employeeId = ("000" + count).slice(-4);
+                console.log(idPrefix+employeeId);
+                let unique = idPrefix+employeeId;
+                req.body.uniqueId = unique;
+                console.log(req.body)
+            }else{
+                let  count = await adminModel.countDocuments({ role: "employee"});
                 count = count+1;
                 let idPrefix = "50105";
                 let employeeId = ("000" + count).slice(-4);

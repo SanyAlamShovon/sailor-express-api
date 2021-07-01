@@ -188,7 +188,7 @@ const sendOTP = async (req, res) => {
     try {
         let otp = nanoid();
         const { phone } = req.params;
-        smsService(otp,phone);
+        smsService("Your verification code for sailor's express is "+otp,phone);
         redis.set(phone, otp,'EX',120000);
 
         res.status(202).json({

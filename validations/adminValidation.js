@@ -68,6 +68,12 @@ const blockAdmin = {
     })
 }
 
+const allAdmin = {
+    params : Joi.object().keys({
+        role : Joi.string().required()
+    })
+}
+
 const signin = {
     body : Joi.object().keys({
         email : Joi.string().email().required(),
@@ -118,5 +124,6 @@ module.exports = {
     postSettings,
     removeSlider,
     updateAdmin,
-    addSlider
+    addSlider,
+    allAdmin
 }

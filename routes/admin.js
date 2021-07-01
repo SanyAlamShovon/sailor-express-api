@@ -29,9 +29,10 @@ router.route('/update')
         adminController.updateAdmin
     )
 
-router.route('/all')
+router.route('/get/:role')
     .get([
-            verifyToken,userPermission('admin')
+        celebrate(adminValidation.allAdmin),
+        verifyToken,userPermission('admin')
         ],
         adminController.allAdmin
     )
