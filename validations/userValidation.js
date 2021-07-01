@@ -9,7 +9,6 @@ const signup = {
         password : Joi.string().required(),
         address : Joi.string().required(),
         phone : Joi.string().required(),
-        otp : Joi.string().required(),
     })
 }
 

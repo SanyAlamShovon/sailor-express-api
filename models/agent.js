@@ -61,7 +61,6 @@ const agentsSchema = new Schema({
     },
     uniqueId : {
         type: String,
-        required : true,
         trim : true
     },
     deliveryAddress: {
