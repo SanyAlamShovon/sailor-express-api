@@ -65,7 +65,7 @@ const dashboard = async (req, res) => {
     try {
         let startDateMonth = moment().subtract(1, 'month')
         let startDateDay = moment().subtract(1, 'day')
-        let totalProduct = await productModel.countDocuments({ forOnline: true, status: false });
+        let totalProduct = await productModel.countDocuments({ forOnline: true, status: true });
         let unapprovedProduct = await productModel.countDocuments({ active: false });
         let totalVendor = await vendorModel.countDocuments({ isApproved: true, isBlocked: false });
         let orderLastMonth = await orderModel.countDocuments({ state: 3, createdAt: { $gte: startDateMonth } })
