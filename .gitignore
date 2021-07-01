@@ -2,4 +2,3 @@ node_modules/
 public/
 .env
 cmd.txt
-package-lock.json
