@@ -100,7 +100,7 @@ const createAdmin = async (req, res) => {
             const hash = bcrypt.hashSync(req.body.password, salt);
             req.body.password = hash;
 
-            let adminRole = req.body.role;
+            let adminRole;
 
             if(req.body.role=="incharge"){
                 if(req.body.incharge=="div"){
@@ -110,7 +110,7 @@ const createAdmin = async (req, res) => {
                     let inchargeId = ("000" + count).slice(-4);
                     let unique = idPrefix+inchargeId;
                     req.body.uniqueId = unique;
-                    adminRole="district "+adminRole;
+                    adminRole="Divisional In-Charge";
                 }else{
                     let  count = await adminModel.countDocuments({ incharge: "dis"})
                     count = count+1;
@@ -118,7 +118,7 @@ const createAdmin = async (req, res) => {
                     let inchargeId = ("000" + count).slice(-4);
                     let unique = idPrefix+inchargeId;
                     req.body.uniqueId = unique;
-                    adminRole="division "+adminRole;
+                    adminRole="District In-Charge";
                 }
             }else if(req.body.role=="admin"){
                 let  count = await adminModel.countDocuments({ role: "admin"});
@@ -129,6 +129,7 @@ const createAdmin = async (req, res) => {
                 let unique = idPrefix+employeeId;
                 req.body.uniqueId = unique;
                 console.log(req.body)
+                adminRole="Admin";
             }else{
                 let  count = await adminModel.countDocuments({ role: "employee"});
                 count = count+1;
@@ -138,12 +139,13 @@ const createAdmin = async (req, res) => {
                 let unique = idPrefix+employeeId;
                 req.body.uniqueId = unique;
                 console.log(req.body)
+                adminRole="Employee";
             }
 
             let admin = await adminModel.create(req.body);
 
             if (admin) {
-                smsService("Congratulation!\nYou have successfully registered as sailor's "+adminRole+".\nId: "+admin.uniqueId,admin.phone);
+                smsService("Congratulations ! You have successfully registered as Sailor's Express."+adminRole+".\nID: "+admin.uniqueId,admin.phone);
                 console.log(adminRole);
                 res.status(201).json({
                     data: admin,

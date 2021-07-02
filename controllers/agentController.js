@@ -108,7 +108,7 @@ const signup = async (req, res) => {
                 let data = await agentModel.create(req.body);
 
                 if (data) {
-                    smsService("Congratulation!\nYou have successfully registered as sailor's e-Agent.\nId: "+data.uniqueId+"\nCode: "+data.agentId,data.phone);
+                    smsService("Congratulations ! You have successfully registered as Sailor's Express.eAgent.\nID: "+data.agentId,data.phone);
                     let token = jwt.sign({
                         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 365),
                         data: {
