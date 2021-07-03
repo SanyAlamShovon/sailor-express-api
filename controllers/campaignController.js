@@ -51,7 +51,7 @@ const createCampaign = async (req, res) => {
         let featuredPath = "public/campaign/featured/" + id + ".jpg";
         let featuredBuffer = Buffer.from(featured, 'base64')
         sharp(featuredBuffer)
-          .resize(200,200)
+          .resize(800)
           .rotate()
           .toFile(featuredPath, (err, info) => {
             if (err) {
@@ -184,7 +184,7 @@ const updateCampaign = async (req, res) => {
       let featuredImage = req.body.featuredImage.split(';base64,').pop();
       let featuredImageBuffer = Buffer.from(featuredImage, 'base64')
       sharp(featuredImageBuffer)
-          .resize(200,200)
+          .resize(800)
           .rotate()
           .toFile(data.featuredImage, (err, info) => {
             if (err) {
