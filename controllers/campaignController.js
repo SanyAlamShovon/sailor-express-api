@@ -46,53 +46,30 @@ const createCampaign = async (req, res) => {
       if (!check) {
         let id = mongoose.Types.ObjectId();
         let banner = req.body.banner.split(';base64,').pop();
-        let path = "public/campaign/" + id + ".jpg";
+        let featuredPath = "public/campaign/featured/" + id + ".jpg";
         let inputBuffer = Buffer.from(banner, 'base64')
         sharp(inputBuffer)
-          .resize(200)
+          .resize(200,200)
+          .rotate()
+          .toFile(featuredPath, (err, info) => {
+            if (err) {
+              console.log(err);
+            }
+            console.log(info)
+          });
+        let path = "public/campaign/" + id + ".jpg";
+        sharp(inputBuffer)
+          .resize(800)
           .rotate()
           .toFile(path, (err, info) => {
             if (err) {
               console.log(err);
             }
-          })
-        ;
-        let pathCampaign = "public/campaign/" + id + ".jpg";
-        sharp(inputBuffer)
-          .resize(800)
-          .rotate()
-          .toFile(pathCampaign, (err, info) => {
-            if (err) {
-              console.log(err);
-            }
+            console.log(info)
           }
         );
-        req.body.banner = pathCampaign;
-
-
-
-        let fectchImg = req.body.fetcherImage.split(';base64,').pop();
-        let pathUrl = "public/campaign/fetch/" + id + ".jpg";
-        let fatchBuffer = Buffer.from(fectchImg, 'base64')
-        sharp(fatchBuffer)
-          .resize(200)
-          .rotate()
-          .toFile(pathUrl, (err, info) => {
-            if (err) {
-              console.log(err);
-            }
-          });
-          
-        sharp(fatchBuffer)
-          .resize(800)
-          .rotate()
-          .toFile(pathUrl, (err, info) => {
-            if (err) {
-              console.log(err);
-            }
-          }
-        );
-        req.body.fetcherImage = pathUrl;
+        req.body.banner = path;
+        req.body.featuredImage = featuredPath;
 
 
         let campaign = await campaignModel.create(req.body);

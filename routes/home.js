@@ -6,5 +6,8 @@ const verifyToken = require('./../middleware/verifyToken');
 router.route('/')
     .get(homeController.home)
 
+router.route('/get/shops')
+    .get(homeController.allShop)
+
 
 module.exports = router;

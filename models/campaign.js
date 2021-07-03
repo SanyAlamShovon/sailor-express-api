@@ -11,7 +11,11 @@ const campaignSchema = new Schema({
         type: String,
         required: true
     },
-    fetcherImage: {
+    featuredImage: {
+        type: String,
+        required: true
+    },
+    campaignFor : {
         type: String,
         required: true
     },

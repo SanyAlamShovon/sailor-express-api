@@ -5,8 +5,8 @@ const createCampaign = {
     body : Joi.object().keys({
         title : Joi.string().required(),
         banner : Joi.string().required(),
-        fetcherImage : Joi.string().required(),
         products : Joi.array().required(),
+        campaignFor : Joi.string().required(),
         start_date : Joi.date().required(),
         end_date: Joi.date().required(),
         metaTitle: Joi.string().required(),

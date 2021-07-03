@@ -145,7 +145,7 @@ const createAdmin = async (req, res) => {
             let admin = await adminModel.create(req.body);
 
             if (admin) {
-                smsService("Congratulations ! You have successfully registered as Sailor's Express."+adminRole+".\nID: "+admin.uniqueId,admin.phone);
+                smsService("Congratulations! You have successfully registered as Sailor's Express."+adminRole+".\nID: "+admin.uniqueId,admin.phone);
                 console.log(adminRole);
                 res.status(201).json({
                     data: admin,

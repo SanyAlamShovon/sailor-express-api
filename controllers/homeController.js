@@ -92,6 +92,37 @@ const home = async (req,res)=>{
     }
 }
 
+
+const allShop = async (req,res)=>{
+    try{
+        console.log("in all shops,,,,,,,")
+        let vendor = await vendorModel.find({featured:true,isBlocked:false},{vendorName:1,thumbnail:1,address:1})
+        let shop = []
+        vendor.map((item)=>{
+            console.log(item)
+            shop.push({
+                _id : item._id,
+                name : item.vendorName,
+                image : item.thumbnail,
+                address : item.address.details
+            })
+            
+        })
+        res.status(200).json({
+            data : shop,
+            success : true
+          });
+    }catch(err){
+        console.log("ERROR:",e);
+        res.status(500).json({
+          data : null,
+          success : false,
+          message : "Internal Server Error Occurred."
+        });
+    }
+}
+
 module.exports = {
-    home
+    home,
+    allShop
 };
