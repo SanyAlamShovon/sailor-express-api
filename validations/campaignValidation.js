@@ -44,10 +44,17 @@ const deleteCampaign = {
     })
 }
 
+const allCampaign = {
+    params : Joi.object().keys({
+        campaignFor : Joi.string().required()
+    })
+}
+
 
 module.exports = {
     createCampaign,
     bySlug,
     deleteCampaign,
-    updateCampaign
+    updateCampaign,
+    allCampaign
 }

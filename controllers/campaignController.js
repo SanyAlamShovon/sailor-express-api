@@ -25,7 +25,7 @@ const projection = {
 
 const allCampaign = async (req, res) => {
   try {
-    let data = await campaignModel.find({status:true},projection).sort({createdAt:-1});
+    let data = await campaignModel.find({status:true,campaignFor:req.params.campaignFor},projection).sort({createdAt:-1});
     res.status(200).json({
       data: data,
       success: true

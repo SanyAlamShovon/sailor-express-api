@@ -29,7 +29,7 @@ const signup = async (req, res) => {
             const hash = bcrypt.hashSync(req.body.password, salt);
             req.body.password = hash;
             req.body.deliveryAddress = req.body.address
-            req.body.role = "user";
+            req.body.role = "customer";
 
             let data= await agentModel.create(req.body);
 

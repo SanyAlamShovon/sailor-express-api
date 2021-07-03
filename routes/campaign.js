@@ -21,11 +21,14 @@ router.route('/update')
         campaignController.updateCampaign
     )
 
-router.route('/get/campaigns')
+router.route('/get/:campaignFor')
     .get(
-            verifyToken,userPermission('admin','agent'),
-            campaignController.allCampaign
-        )
+        [
+            celebrate(campaignValidation.allCampaign),
+            verifyToken,userPermission('admin','agent','customer')
+        ],
+        campaignController.allCampaign
+    )
 
 router.route('/slug/view/:slug')
     .get([
