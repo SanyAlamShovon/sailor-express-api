@@ -7,7 +7,7 @@ const orderValidation = require('./../validations/orderValidation');
 
 router.route('/create') //by customer
     .post([
-            // verifyToken,userPermission('agent'),
+            verifyToken,userPermission('agent','customer'),
             celebrate(orderValidation.createOrder)
         ],
         orderController.createOrder

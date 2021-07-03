@@ -17,6 +17,7 @@ const createOrder = {
         deliveryType : Joi.number(),
         isOnline : Joi.boolean(),
         phone : Joi.string(),
+        createdBy : Joi.string().required(),
         customer : Joi.object().keys({
             _id : Joi.string(),
             name : Joi.string(),

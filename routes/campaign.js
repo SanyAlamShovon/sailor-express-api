@@ -23,10 +23,7 @@ router.route('/update')
 
 router.route('/get/:campaignFor')
     .get(
-        [
-            celebrate(campaignValidation.allCampaign),
-            verifyToken,userPermission('admin','agent','customer')
-        ],
+        celebrate(campaignValidation.allCampaign),
         campaignController.allCampaign
     )
 

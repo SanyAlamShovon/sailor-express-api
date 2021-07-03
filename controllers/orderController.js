@@ -202,6 +202,7 @@ const createOrder = async (req, res) => {
                 }
             })
         })
+
         let orderObj = {
             _id: id,
             products: finalProducts,
@@ -216,7 +217,7 @@ const createOrder = async (req, res) => {
             isOnline: true,
             deliveryType: req.body.deliveryType,
             deliveryCharge: deliveryCharge,
-            createdBy: 'agent',
+            createdBy: req.body.createdBy,
             invoice: 'public/invoice/' + orderId + '.pdf'
         }
         let total_amount = 0
@@ -225,7 +226,7 @@ const createOrder = async (req, res) => {
         })
         let agent = await agentModel.findOne({ _id: req.body.customer._id })
         console.log(agent.balance+"----------"+total_amount);
-        if (agent.balance < (total_amount / 2)) {
+        if (agent.balance>=50000 && agent.balance < (total_amount / 2)) {
             res.status(409).json({
                 data: null,
                 message: "Insufficient balance!!",
@@ -233,7 +234,9 @@ const createOrder = async (req, res) => {
             });
             return
         }
-        
+        due = total_amount/2;
+        orderObj.orderDue = due;
+        orderObj.monthlyEmi = due/12;
         let create = await orderModel.create(orderObj)
         console.log('order : ', create);
         if (create) {

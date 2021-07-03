@@ -88,6 +88,14 @@ const orderSchema = new Schema({
         type: Number,
         required: true
     },
+    orderDue: {
+        type: Number,
+        default:0
+    },
+    monthlyEmi: {
+        type: Number,
+        default:0
+    },
     promo: {
         type: String
     },
