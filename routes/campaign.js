@@ -13,6 +13,14 @@ router.route('/create')
         campaignController.createCampaign
     )
 
+router.route('/update')
+    .post([
+            celebrate(campaignValidation.updateCampaign),
+            verifyToken,userPermission('admin')
+        ],
+        campaignController.updateCampaign
+    )
+
 router.route('/get/campaigns')
     .get(
             verifyToken,userPermission('admin','agent'),

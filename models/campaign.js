@@ -8,12 +8,10 @@ const campaignSchema = new Schema({
         required: true
     },
     banner: {
-        type: String,
-        required: true
+        type: String
     },
     featuredImage: {
-        type: String,
-        required: true
+        type: String
     },
     campaignFor : {
         type: String,

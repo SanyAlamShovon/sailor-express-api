@@ -16,6 +16,22 @@ const createCampaign = {
     })
 }
 
+const updateCampaign = {
+    body : Joi.object().keys({
+        _id : Joi.string().required(),
+        title : Joi.string().required(),
+        products : Joi.array().required(),
+        campaignFor : Joi.string().required(),
+        start_date : Joi.date().required(),
+        end_date: Joi.date().required(),
+        metaTitle: Joi.string().required(),
+        metaKeyword: Joi.string().required(),
+        metaDescription: Joi.string().required(),
+        slug: Joi.string().required(),
+        banner : Joi.string().allow(null),
+    })
+}
+
 const bySlug = {
     params : Joi.object().keys({
         slug : Joi.string().required()
@@ -32,5 +48,6 @@ const deleteCampaign = {
 module.exports = {
     createCampaign,
     bySlug,
-    deleteCampaign
+    deleteCampaign,
+    updateCampaign
 }

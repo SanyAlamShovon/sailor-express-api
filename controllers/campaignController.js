@@ -145,10 +145,72 @@ const deleteCampaign = async (req,res) => {
 }
 
 
+const updateCampaign = async (req, res) => {
+  try {
+    body = {
+      title: req.body.title,
+      products: req.body.products,
+      slug: req.body.slug,
+      start_date: req.body.start_date,
+      end_date: req.body.end_date,
+      metaTitle : req.body.metaTitle,
+      metaKeyword : req.body.metaKeyword,
+      metaDescription : req.body.metaDescription,
+      campaignFor : req.body.campaignFor,
+    }
+    let update = await campaignModel.updateOne({ _id: req.body._id }, { $set: body });
+    let data = await campaignModel.findOne({ _id: req.body._id }, projection)
+    
+    if(req.body.banner){
+      let banner = req.body.banner.split(';base64,').pop();
+        let inputBuffer = Buffer.from(banner, 'base64')
+        sharp(inputBuffer)
+          .resize(200,200)
+          .rotate()
+          .toFile(data.featuredImage, (err, info) => {
+            if (err) {
+              console.log(err);
+            }
+            console.log(info)
+          });
+        sharp(inputBuffer)
+          .resize(800)
+          .rotate()
+          .toFile(data.banner, (err, info) => {
+            if (err) {
+              console.log(err);
+            }
+            console.log(info)
+          }
+        );
+    }
+    
+    if (update) {
+        res.status(201).json({
+            data: data,
+            message: "Campaign updated successfully.",
+            success: true
+        });
+    } else {
+        res.status(409).json({
+            data: null,
+            success: false
+        });
+    }
+  } catch (err) {
+      res.status(500).json({
+          data: null,
+          success: false,
+          message: "Internal Server Error Occurred."
+      });
+  }
+}
+
 
 module.exports = {
   createCampaign,
   allCampaign,
   viewCampaigntSlug,
-  deleteCampaign
+  deleteCampaign,
+  updateCampaign
 };

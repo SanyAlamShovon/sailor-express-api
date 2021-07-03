@@ -104,7 +104,7 @@ const allShop = async (req,res)=>{
                 _id : item._id,
                 name : item.vendorName,
                 image : item.thumbnail,
-                address : item.address.details
+                address : item.address
             })
             
         })
