@@ -5,6 +5,7 @@ const createCampaign = {
     body : Joi.object().keys({
         title : Joi.string().required(),
         banner : Joi.string().required(),
+        featuredImage : Joi.string().required(),
         products : Joi.array().required(),
         campaignFor : Joi.string().required(),
         start_date : Joi.date().required(),
@@ -29,6 +30,7 @@ const updateCampaign = {
         metaDescription: Joi.string().required(),
         slug: Joi.string().required(),
         banner : Joi.string().allow(null),
+        featuredImage : Joi.string().allow(null),
     })
 }
 

@@ -45,10 +45,12 @@ const createCampaign = async (req, res) => {
       let check = await campaignModel.findOne({ metaTitle: req.body.metaTitle })
       if (!check) {
         let id = mongoose.Types.ObjectId();
+        let featured = req.body.featuredImage.split(';base64,').pop();
         let banner = req.body.banner.split(';base64,').pop();
+        
         let featuredPath = "public/campaign/featured/" + id + ".jpg";
-        let inputBuffer = Buffer.from(banner, 'base64')
-        sharp(inputBuffer)
+        let featuredBuffer = Buffer.from(featured, 'base64')
+        sharp(featuredBuffer)
           .resize(200,200)
           .rotate()
           .toFile(featuredPath, (err, info) => {
@@ -57,8 +59,10 @@ const createCampaign = async (req, res) => {
             }
             console.log(info)
           });
+        
+        let bannerBuffer = Buffer.from(banner, 'base64')
         let path = "public/campaign/" + id + ".jpg";
-        sharp(inputBuffer)
+        sharp(bannerBuffer)
           .resize(800)
           .rotate()
           .toFile(path, (err, info) => {
@@ -162,17 +166,8 @@ const updateCampaign = async (req, res) => {
     let data = await campaignModel.findOne({ _id: req.body._id }, projection)
     
     if(req.body.banner){
-      let banner = req.body.banner.split(';base64,').pop();
+        let banner = req.body.banner.split(';base64,').pop();
         let inputBuffer = Buffer.from(banner, 'base64')
-        sharp(inputBuffer)
-          .resize(200,200)
-          .rotate()
-          .toFile(data.featuredImage, (err, info) => {
-            if (err) {
-              console.log(err);
-            }
-            console.log(info)
-          });
         sharp(inputBuffer)
           .resize(800)
           .rotate()
@@ -183,6 +178,20 @@ const updateCampaign = async (req, res) => {
             console.log(info)
           }
         );
+    }
+
+    if(req.body.featuredImage){
+      let featuredImage = req.body.featuredImage.split(';base64,').pop();
+      let featuredImageBuffer = Buffer.from(featuredImage, 'base64')
+      sharp(featuredImageBuffer)
+          .resize(200,200)
+          .rotate()
+          .toFile(data.featuredImage, (err, info) => {
+            if (err) {
+              console.log(err);
+            }
+            console.log(info)
+          });
     }
     
     if (update) {
