@@ -53,6 +53,37 @@ const ordersByDate = async (req, res) => { //online orders
     }
 }
 
+const allOrders = async (req, res) => { //online orders
+    try {
+        let data;
+        let startDate = moment().subtract(1, 'month').format()
+        let endDate = moment().format()
+        if (req.body.startDate && req.body.endDate) {
+            startDate = moment(req.body.startDate).format()
+            endDate = moment(req.body.endDate).format()
+        }
+        if (req.body.search) {
+            let user = new RegExp(req.body.search, "i")
+            let filter = {$or: [{ "customer.name": { "$regex": user } }, { "phone": { "$regex": user } }], "createdAt": { "$gte": startDate, "$lte": endDate } }
+            data = await orderModel.find(filter, projection).sort({ createdAt: -1 });
+        } else {
+            let filter = { "createdAt": { "$gte": startDate, "$lte": endDate } }
+            data = await orderModel.find(filter, projection).sort({ createdAt: -1 });
+        }
+        res.status(200).json({
+            data: data,
+            success: true
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            data: null,
+            success: false,
+            message: "Internal Server Error Occurred."
+        });
+    }
+}
+
 const allOrdersByVendor = async (req, res) => {
     try {
         let data;
@@ -762,6 +793,7 @@ const orderStatus = async (req, res) => {
 
 module.exports = {
     ordersByDate,
+    allOrders,
     createOrder,
     deleteOrder,
     updateOrderState,

@@ -36,6 +36,13 @@ router.route('/view/byDate')
         orderController.ordersByDate
     )
 
+router.route('/view')
+    .post([
+            verifyToken,userPermission('admin')
+        ],
+        orderController.allOrders
+    )
+
 router.route('/pay/:id')
     .get(orderController.pay)
 
