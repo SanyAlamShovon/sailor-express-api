@@ -227,7 +227,7 @@ const createOrder = async (req, res) => {
         })
         let agent = await agentModel.findOne({ _id: req.body.customer._id })
         console.log(agent.balance+"----------"+total_amount);
-        if (agent.balance<50000 && agent.balance < (total_amount / 2)) {
+        if (agent.balance<50000 || agent.balance < (total_amount / 2)) {
             res.status(409).json({
                 data: null,
                 message: "Insufficient balance!!",
