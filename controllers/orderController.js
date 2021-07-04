@@ -220,13 +220,14 @@ const createOrder = async (req, res) => {
             createdBy: req.body.createdBy,
             invoice: 'public/invoice/' + orderId + '.pdf'
         }
+
         let total_amount = 0
         finalProducts.map((item) => {
             total_amount += (item.price * item.quantity)
         })
         let agent = await agentModel.findOne({ _id: req.body.customer._id })
         console.log(agent.balance+"----------"+total_amount);
-        if (agent.balance>=50000 && agent.balance < (total_amount / 2)) {
+        if (agent.balance<50000 && agent.balance < (total_amount / 2)) {
             res.status(409).json({
                 data: null,
                 message: "Insufficient balance!!",
@@ -267,6 +268,12 @@ const createOrder = async (req, res) => {
                 await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { due: (total_amount / 2) } })
 
             }
+            createOnlineInvoice(create, 'public/invoice/' + orderId + '.pdf', 0);
+            res.status(201).json({
+                data: create,
+                message: "Order created successfully.",
+                success: true
+            });
         }
         
         // let text = "We have received your order. Thank you for shopping with JMC."
@@ -276,12 +283,6 @@ const createOrder = async (req, res) => {
         // }).catch((err) => {
         //     console.log(err);
         // })
-        createOnlineInvoice(create, 'public/invoice/' + orderId + '.pdf', 0);
-        res.status(201).json({
-            data: create,
-            message: "Order created successfully.",
-            success: true
-        });
     } catch (err) {
         console.log(err);
         res.status(500).json({
