@@ -565,8 +565,6 @@ const bankPayment = async (req, res) => {
     }
 }
 
-
-
 const agentBankPayments = async (req, res) => {
     try {
         let data = await bankInfoModel.find({agentId:req.params.id});
@@ -639,7 +637,13 @@ const emi = async (req, res) => {
         )
         console.log("1st query...");
         
-        await agentModel.findByIdAndUpdate(req.body._id, { $inc: { cash_back: (trueAmount) * (0.4) } },{new:true});
+        // await agentModel.findByIdAndUpdate(
+        //     req.body._id, 
+        //     { 
+        //         $inc: { 
+        //             cash_back: (trueAmount) * (0.4) 
+        //         } 
+        //     },{new:true});
         await adminModel.findByIdAndUpdate(
             agent.district_incharge._id,
             {

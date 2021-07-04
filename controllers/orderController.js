@@ -22,7 +22,7 @@ const projection = {
     __v: 0
 }
 
-const allOrders = async (req, res) => { //online orders
+const ordersByDate = async (req, res) => { //online orders
     try {
         let data;
         let startDate = moment().subtract(1, 'month').format()
@@ -233,40 +233,42 @@ const createOrder = async (req, res) => {
                 success: false
             });
             return
-        }
-        due = total_amount/2;
-        orderObj.orderDue = due;
-        orderObj.monthlyEmi = due/12;
-        let create = await orderModel.create(orderObj)
-        console.log('order : ', create);
-        if (create) {
-            finalProducts.map(async (item) => {
-                let vendor = await vendorModel.findOne({ _id: item.vendor._id }, { commission: 1 })
-                let vendorShare = parseInt(item.price * (100 - vendor.commission) / 100)
-                console.log(vendorShare);
-                await vendorModel.updateOne({ _id: item.vendor._id }, { $inc: { balance: vendorShare } })
-                let saleObj = {
-                    product: {
-                        _id: item._id,
-                        name: item.name,
-                        price: item.price - item.discount,
-                        quantity: item.quantity
-                    },
-                    vendorShare: vendorShare,
-                    vendor: item.vendor,
-                    buyingPrice: item.buyingPrice,
-                    customer: req.body.customer,
-                    paymentType: req.body.paymentType,
-                    orderId: id
-                }
-                await saleModel.create(saleObj)
-                await productModel.updateOne({ _id: item._id, "sizes.size": item.size }, { $inc: { "currentStock": -1, "sizes.$.stock": -1 } })
-            })
-            console.log('TA:'+total_amount);
-            await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { balance: (total_amount * (-1) / 2) } })
-            await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { due: (total_amount / 2) } })
+        }else{
+            due = total_amount/2;
+            orderObj.orderDue = due;
+            orderObj.monthlyEmi = due/12;
+            let create = await orderModel.create(orderObj)
+            console.log('order : ', create);
+            if (create) {
+                finalProducts.map(async (item) => {
+                    let vendor = await vendorModel.findOne({ _id: item.vendor._id }, { commission: 1 })
+                    let vendorShare = parseInt(item.price * (100 - vendor.commission) / 100)
+                    console.log(vendorShare);
+                    await vendorModel.updateOne({ _id: item.vendor._id }, { $inc: { balance: vendorShare } })
+                    let saleObj = {
+                        product: {
+                            _id: item._id,
+                            name: item.name,
+                            price: item.price - item.discount,
+                            quantity: item.quantity
+                        },
+                        vendorShare: vendorShare,
+                        vendor: item.vendor,
+                        buyingPrice: item.buyingPrice,
+                        customer: req.body.customer,
+                        paymentType: req.body.paymentType,
+                        orderId: id
+                    }
+                    await saleModel.create(saleObj)
+                    await productModel.updateOne({ _id: item._id, "sizes.size": item.size }, { $inc: { "currentStock": -1, "sizes.$.stock": -1 } })
+                })
+                console.log('TA:'+total_amount);
+                await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { balance: (total_amount * (-1) / 2) } })
+                await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { due: (total_amount / 2) } })
 
+            }
         }
+        
         // let text = "We have received your order. Thank you for shopping with JMC."
         // let smsUrl = "https://smsplus.sslwireless.com/api/v3/send-sms?api_token=601b554b-0d83-4620-a48f-8fe5d47e6d29&sid=JMCSHOPPINGBULK&sms=" + text + "&msisdn=" + create.phone + "&csms_id=signup" +create._id.toString();
         // axios.get(encodeURI(smsUrl)).then((res) => {
@@ -758,7 +760,7 @@ const orderStatus = async (req, res) => {
 }
 
 module.exports = {
-    allOrders,
+    ordersByDate,
     createOrder,
     deleteOrder,
     updateOrderState,

@@ -29,11 +29,11 @@ router.route('/create/offline')
         orderController.createOfflineOrder
     )
 
-router.route('/view')
-    .get([
+router.route('/view/byDate')
+    .post([
             verifyToken,userPermission('admin')
         ],
-        orderController.allOrders
+        orderController.ordersByDate
     )
 
 router.route('/pay/:id')
