@@ -73,7 +73,6 @@ function generateInvoiceTable(doc, invoice, promoDiscount) {
     "Quantity",
     "Unit Cost",
     "Vat",
-    "Discount",
     "Line Total"
   );
   generateHr(doc, invoiceTableTop + 20);
@@ -89,7 +88,6 @@ function generateInvoiceTable(doc, invoice, promoDiscount) {
       item.quantity,
       formatCurrency(item.price),
       item.vat,
-      item.discount,
       formatCurrency((item.price+item.vat-item.discount)*item.quantity)
     );
 

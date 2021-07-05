@@ -204,6 +204,157 @@ const createOrder = async (req, res) => {
         let finalProducts = []
         products.map(async (item, index) => {
             let dis = 0;
+            // if (item.discount.type == 1) {
+            //     dis = item.discount.amount
+            // } else {
+            //     dis = item.price * item.discount.amount / 100;
+            // }
+            let quantity = 0
+            let size;
+            req.body.products.map((it) => {
+                if (it._id == item._id) {
+                    size = it.size
+                    quantity = it.quantity
+                }
+            })
+            let tempVat = item.price * item.vat / 100
+            vat += (tempVat * quantity)
+            totalBill += ((item.price - dis + tempVat) * quantity);
+            finalProducts.push({
+                _id: item._id,
+                affiliate: item.affiliate,
+                name: item.name,
+                price: item.price,
+                discount: dis,
+                vat: tempVat,
+                buyingPrice: item.buyingPrice,
+                size: size,
+                quantity: quantity,
+                vendor: {
+                    _id: item.vendorId,
+                    name: item.vendorName
+                }
+            })
+        })
+
+        let orderObj = {
+            _id: id,
+            products: finalProducts,
+            totalBill: totalBill,
+            discount: discount,
+            vat: vat,
+            phone: req.body.phone,
+            paymentType: req.body.paymentType,
+            customer: req.body.customer,
+            orderId: orderId,
+            state: state,
+            isOnline: true,
+            deliveryType: req.body.deliveryType,
+            deliveryCharge: deliveryCharge,
+            createdBy: req.body.createdBy,
+            invoice: 'public/invoice/' + orderId + '.pdf'
+        }
+
+        let total_amount = 0
+        finalProducts.map((item) => {
+            total_amount += (item.price * item.quantity)
+        })
+        let agent = await agentModel.findOne({ _id: req.body.customer._id })
+        console.log(agent.balance+"----------"+total_amount);
+        if (agent.balance<50000 || agent.balance < (total_amount / 2)) {
+            res.status(409).json({
+                data: null,
+                message: "Insufficient balance!!",
+                success: false
+            });
+            return
+        }else{
+            due = total_amount/2;
+            orderObj.orderDue = due;
+            orderObj.monthlyEmi = due/12;
+            let create = await orderModel.create(orderObj)
+            console.log('order : ', create);
+            if (create) {
+                finalProducts.map(async (item) => {
+                    let vendor = await vendorModel.findOne({ _id: item.vendor._id }, { commission: 1 })
+                    let vendorShare = parseInt(item.price * (100 - vendor.commission) / 100)
+                    console.log(vendorShare);
+                    await vendorModel.updateOne({ _id: item.vendor._id }, { $inc: { balance: vendorShare } })
+                    let saleObj = {
+                        product: {
+                            _id: item._id,
+                            name: item.name,
+                            price: item.price - item.discount,
+                            quantity: item.quantity
+                        },
+                        vendorShare: vendorShare,
+                        vendor: item.vendor,
+                        buyingPrice: item.buyingPrice,
+                        customer: req.body.customer,
+                        paymentType: req.body.paymentType,
+                        orderId: id
+                    }
+                    await saleModel.create(saleObj)
+                    await productModel.updateOne({ _id: item._id, "sizes.size": item.size }, { $inc: { "currentStock": -1, "sizes.$.stock": -1 } })
+                })
+                console.log('TA:'+total_amount);
+                await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { balance: (total_amount * (-1) / 2) } })
+                await agentModel.findByIdAndUpdate(req.body.customer._id, { $inc: { due: (total_amount / 2) } })
+
+            }
+            createOnlineInvoice(create, 'public/invoice/' + orderId + '.pdf', 0);
+            res.status(201).json({
+                data: create,
+                message: "Order created successfully.",
+                success: true
+            });
+        }
+        
+        // let text = "We have received your order. Thank you for shopping with JMC."
+        // let smsUrl = "https://smsplus.sslwireless.com/api/v3/send-sms?api_token=601b554b-0d83-4620-a48f-8fe5d47e6d29&sid=JMCSHOPPINGBULK&sms=" + text + "&msisdn=" + create.phone + "&csms_id=signup" +create._id.toString();
+        // axios.get(encodeURI(smsUrl)).then((res) => {
+        //     console.log(res.status);
+        // }).catch((err) => {
+        //     console.log(err);
+        // })
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            data: null,
+            success: false,
+            message: "Internal Server Error Occurred."
+        });
+    }
+}
+
+const createOrderCustomer = async (req, res) => {
+    try {
+        let productIds = req.body.products.map((item) => {
+            return item._id
+        })
+        let products = await productModel.find({ _id: { $in: productIds } }, { name: 1, price: 1, vat: 1, buyingPrice: 1, discount: 1, vendorId: 1, vendorName: 1 }).sort({ _id: 1 })
+        let state = 0;
+        let discount = 0;
+        let id = mongoose.Types.ObjectId()
+        let id_prefix  = "SEL"+nanoid();
+        let orderCount = await orderModel.count();
+        let orderId = orderCount.toString()
+        while (orderId.length < 5) {
+            orderId = "0" + orderId
+        }
+        orderId = id_prefix+orderId;
+        let totalBill = 0;
+        let deliveryCharge = 0;
+        if (req.body.deliveryType == 1) {
+            deliveryCharge = 50
+        } else if (req.body.deliveryType == 2) {
+            deliveryCharge = 100
+        }
+        totalBill += deliveryCharge
+        let vat = 0
+        let finalProducts = []
+        products.map(async (item, index) => {
+            let dis = 0;
             if (item.discount.type == 1) {
                 dis = item.discount.amount
             } else {
