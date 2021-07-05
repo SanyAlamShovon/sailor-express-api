@@ -9,8 +9,8 @@ const { errors } = require('celebrate');
 const helmet = require('helmet');
 let io = require('socket.io');
 
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-app.use(bodyParser.json({limit: '50mb', extended: true},));
+app.use(express.urlencoded({extended: true}));
+app.use(express.json()) 
 app.use(session({secret : process.env.TokenSecret, resave : false, saveUninitialized : true}));
 app.use('/public',[express.static('public')])
 

@@ -18,6 +18,7 @@ const { agent } = require('../routes');
 const { emi } = require('./agentController');
 
 const locationData = require('../data/locations.json');
+const { EMLINK } = require('constants');
 
 const projection = {
     updatedAt: 0,
@@ -40,10 +41,16 @@ const agentReport = async (req,res) => {
                 "role": "agent"
             },projection);
         
-        let orders = await orderModel.find({"customer._id":agent._id});
-        
         let emis = await emiModel.find({"agentId":agent._id});
-        let instalment = (agent.due/12).toFixed(2);
+        let instalment=0;
+        let total_orderDue=0;
+        let orders = await orderModel.find({"customer._id":agent._id});
+
+        for(let index in orders){
+            total_orderDue += orders[index].orderDue;
+            instalment += orders[index].monthlyEmi;
+        }
+
         let payable = (instalment*0.6).toFixed(2);
 
         let report = {
@@ -58,7 +65,7 @@ const agentReport = async (req,res) => {
             incharge_dis: agent.district_incharge,
             incharge_div: agent.division_incharge,
             balance: agent.balance,
-            due: agent.due,
+            due: total_orderDue,
             next_instalment:instalment,
             payable_instalment: payable,
             deposit_history: agent.cash_in,

@@ -1,5 +1,6 @@
 const adminModel = require('./../models/admin');
 const agentModel = require('./../models/agent');
+const emiModel = require('./../models/emi');
 const settingModel = require('./../models/setting');
 const productModel = require('./../models/product');
 const brandModel = require('./../models/brand');
@@ -20,6 +21,7 @@ const sharp = require('sharp');
 const _ = require('lodash');
 const bankInfoModel = require('./../models/bankpayments');
 const smsService = require('./../middleware/smsService');
+const { json } = require('body-parser');
 
 const projection = {
     password: 0,
@@ -737,17 +739,20 @@ const allPayments = async (req, res) => {
 
 const approvePayment = async (req, res) => {
     try {
-      let data =  await bankInfoModel.findByIdAndUpdate(req.params.paymentId, { $set: { status: 1 } })
-      console.log(data);
-      if(data){
-          if(data.type=='cash_In'){
+      let pendingPayment =  await bankInfoModel.findOne({
+          _id : req.params.paymentId,
+          status : 0
+      })
+      
+      if(pendingPayment){
+        if(pendingPayment.type=='settelment_balance'){
             let trx_id = mongoose.Types.ObjectId();
             let cash_in = {
-                amount: data.amount,
+                amount: pendingPayment.amount,
                 trx_id: trx_id
             }
-            let agent = await agentModel.findByIdAndUpdate(data.agentId, 
-                { $push: { cash_in: cash_in }, $inc: { balance: Number(data.amount) } }, { new: true });
+            let agent = await agentModel.findByIdAndUpdate(pendingPayment.agentId, 
+                { $push: { cash_in: cash_in }, $inc: { balance: Number(pendingPayment.amount) } }, { new: true });
             if (agent.cash_in.length==1) {
                 console.log(agent)
                 let dis_commission = (cash_in.amount * 3) / 100
@@ -756,48 +761,81 @@ const approvePayment = async (req, res) => {
                 await adminModel.updateOne({ _id: agent.division_incharge._id}, { $inc: { balance: div_commission } })
             }
             console.log(agent)
-          }else if(data.type=='order'){
-
-          }else if(data.type=='emi'){
-            let trueAmount = data.amount/0.6;
-            let agent = await agentModel.findByIdAndUpdate(
-                data.agentId, 
+        }else if(pendingPayment.type=='settelment_due'){
+            let trx_id = mongoose.Types.ObjectId();
+            let cash_in = {
+                amount: pendingPayment.amount,
+                trx_id: trx_id
+            }
+            let agent = await agentModel.findByIdAndUpdate(pendingPayment.agentId, 
                 { 
+                    $push: { cash_in: cash_in }, 
                     $inc: { 
-                        due: (trueAmount) * (-1) } 
-                    },{new:true}
-            )
-            await agentModel.findByIdAndUpdate(data.agentId, { $inc: { cash_back: (trueAmount) * (0.4) } },{new:true});
-            await adminModel.findByIdAndUpdate(
-                agent.district_incharge._id,
+                        balance: Number(pendingPayment.amount),
+                        due: Number(pendingPayment.amount)*(-1)
+                    } 
+                }, { new: true });
+            
+            console.log(agent)
+        }else if(pendingPayment.type=='emi'){
+        let trueAmount = pendingPayment.amount/0.6;
+
+        let orders = await orderModel.find({"customer._id":pendingPayment.agentId,orderDue:{ $gt : 0}});
+
+        for(let index in orders){
+            let newOrderDue = orders[index].orderDue - orders[index].monthlyEmi;
+            let emi = orders[index].monthlyEmi;
+            if(newOrderDue<2){
+                emi = 0;
+                newOrderDue = 0;
+            }
+            let update = await orderModel.update(
                 {
-                    $inc:{
-                        balance: (trueAmount*3)/100
+                    _id: orders[index]._id
+                },
+                {
+                    $set: {
+                        orderDue: newOrderDue,
+                        monthlyEmi: emi
                     }
                 }
-            )
-            await adminModel.findByIdAndUpdate(
-                agent.division_incharge._id,
-                {
-                    $inc:{
-                        balance: (trueAmount*2)/100
-                    }
+            );
+        }
+
+        let agent = await agentModel.findById({_id:pendingPayment.agentId})
+        
+        await adminModel.findByIdAndUpdate(
+            agent.district_incharge._id,
+            {
+                $inc:{
+                    balance: (trueAmount*3)/100
                 }
-            )
-            let emiData =  await emiModel.create({
-                agentId : agent._id,
-                amount : data.amount,
-                disInchargeId : agent.district_incharge._id,
-                divInchargeId : agent.division_incharge._id
-            });
-            console.log(emiData)
-          }
-          res.status(200).json({
+            }
+        )
+        await adminModel.findByIdAndUpdate(
+            agent.division_incharge._id,
+            {
+                $inc:{
+                    balance: (trueAmount*2)/100
+                }
+            }
+        )
+
+        let emiData =  await emiModel.create({
+            agentId : agent._id,
+            amount : pendingPayment.amount,
+            disInchargeId : agent.district_incharge._id,
+            divInchargeId : agent.division_incharge._id
+        });
+        console.log(emiData)
+        }
+        await bankInfoModel.findByIdAndUpdate(pendingPayment, { $set: { status: 1 } })
+        res.status(200).json({
             success: true,
             message: "Payment approved!"
-          });
+        });
       }else{
-        res.status(409).json({
+        res.status(404).json({
             success: true,
             message: "No record found!"
           });
