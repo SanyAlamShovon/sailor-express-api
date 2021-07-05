@@ -16,6 +16,8 @@ const createOnlineInvoice = require("./../createOnlineInvoice.js").createInvoice
 const createOfflineInvoice = require("./../createOfflineInvoice.js").createInvoice;
 const promoModel = require('../models/promo');
 
+const { customAlphabet } = require('nanoid')
+const nanoid = customAlphabet('1234567890', 4)
 
 const projection = {
     updatedAt: 0,
@@ -183,11 +185,13 @@ const createOrder = async (req, res) => {
         let state = 0;
         let discount = 0;
         let id = mongoose.Types.ObjectId()
+        let id_prefix  = "SEL"+nanoid();
         let orderCount = await orderModel.count();
         let orderId = orderCount.toString()
-        while (orderId.length < 6) {
+        while (orderId.length < 5) {
             orderId = "0" + orderId
         }
+        orderId = id_prefix+orderId;
         let totalBill = 0;
         let deliveryCharge = 0;
         if (req.body.deliveryType == 1) {
