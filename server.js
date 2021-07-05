@@ -9,7 +9,7 @@ const { errors } = require('celebrate');
 const helmet = require('helmet');
 let io = require('socket.io');
 
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ limit: "50mb", parameterLimit: 500000000, extended: true }));
 app.use(express.json()) 
 app.use(session({secret : process.env.TokenSecret, resave : false, saveUninitialized : true}));
 app.use('/public',[express.static('public')])
@@ -19,7 +19,7 @@ const options = {
     apis: ['./routes/*.js'],
 };
 
-const whitelist = ['http://localhost:3000','http://localhost']
+const whitelist = ['http://localhost:3000','http://localhost','http://localhost:80']
 const router = require('./routes');
 let server = http.createServer(app);
 
