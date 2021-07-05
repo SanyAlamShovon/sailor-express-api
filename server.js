@@ -13,6 +13,7 @@ app.use(express.urlencoded({ limit: "50mb", parameterLimit: 500000000, extended:
 app.use(express.json()) 
 app.use(session({secret : process.env.TokenSecret, resave : false, saveUninitialized : true}));
 app.use('/public',[express.static('public')])
+app.use(cors({origin : '*'}))
 
 const options = {
     explorer : true,
