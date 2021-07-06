@@ -219,7 +219,8 @@ const createOrder = async (req, res) => {
             })
             let tempVat = item.price * item.vat / 100
             vat += (tempVat * quantity)
-            totalBill += ((item.price - dis + tempVat) * quantity);
+            //totalBill += ((item.price - dis + tempVat) * quantity);
+            totalBill += ((item.price + tempVat) * quantity);
             finalProducts.push({
                 _id: item._id,
                 affiliate: item.affiliate,
@@ -236,13 +237,15 @@ const createOrder = async (req, res) => {
                 }
             })
         })
-
+        due = totalBill/2;
         let orderObj = {
             _id: id,
             products: finalProducts,
             totalBill: totalBill,
             discount: discount,
             vat: vat,
+            orderDue: due,
+            monthlyEmi: due/12,
             phone: req.body.phone,
             paymentType: req.body.paymentType,
             customer: req.body.customer,
@@ -260,8 +263,8 @@ const createOrder = async (req, res) => {
             total_amount += (item.price * item.quantity)
         })
         let agent = await agentModel.findOne({ _id: req.body.customer._id })
-        console.log(agent.balance+"----------"+total_amount);
-        if (agent.balance<50000 || agent.balance < (total_amount / 2)) {
+        console.log(agent.balance+"----------"+totalBill);
+        if (agent.balance<50000 || agent.balance < (totalBill / 2)) {
             res.status(409).json({
                 data: null,
                 message: "Insufficient balance!!",
@@ -269,7 +272,6 @@ const createOrder = async (req, res) => {
             });
             return
         }else{
-            due = total_amount/2;
             orderObj.orderDue = due;
             orderObj.monthlyEmi = due/12;
             let create = await orderModel.create(orderObj)
@@ -277,6 +279,7 @@ const createOrder = async (req, res) => {
             if (create) {
                 finalProducts.map(async (item) => {
                     let vendor = await vendorModel.findOne({ _id: item.vendor._id }, { commission: 1 })
+                    console.log(vendor.commission);
                     let vendorShare = parseInt(item.price * (100 - vendor.commission) / 100)
                     console.log(vendorShare);
                     await vendorModel.updateOne({ _id: item.vendor._id }, { $inc: { balance: vendorShare } })
