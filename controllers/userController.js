@@ -14,7 +14,7 @@ const adminModel = require('./../models/admin');
 const bankInfoModel = require('./../models/bankpayments');
 const address = require('@bangladeshi/bangladesh-address');
 const sharp = require('sharp');
-const redis = require('./../config/db').redis;
+//const redis = require('./../config/db').redis;
 const smsService = require('./../middleware/smsService');
 
 const { customAlphabet } = require('nanoid')
@@ -189,7 +189,7 @@ const sendOTP = async (req, res) => {
         let otp = nanoid();
         const { phone } = req.params;
         smsService("Your verification code for sailor's express is "+otp,phone);
-        redis.set(phone, otp,'EX',120000);
+        //redis.set(phone, otp,'EX',120000);
 
         res.status(202).json({
             success: true,
@@ -208,30 +208,30 @@ const sendOTP = async (req, res) => {
 const authenticateOTP = async (req, res) => {
     const { phone, otp } = req.params;
     try {
-        redis.get(phone, (err, data) => {
-            if (err) throw err;
+        // redis.get(phone, (err, data) => {
+        //     if (err) throw err;
         
-            if (data !== null) {
-                if(data == otp){
-                    redis.del(phone)
-                    res.status(202).json({
-                        success: true,
-                        message: "Authenticatation successful!"
-                    });
-                }else{
-                    res.status(404).json({
-                        success: false,
-                        message: "OTP mismatched."
-                    });
-                }
+        //     if (data !== null) {
+        //         if(data == otp){
+        //             redis.del(phone)
+        //             res.status(202).json({
+        //                 success: true,
+        //                 message: "Authenticatation successful!"
+        //             });
+        //         }else{
+        //             res.status(404).json({
+        //                 success: false,
+        //                 message: "OTP mismatched."
+        //             });
+        //         }
                 
-            } else {
-                res.status(404).json({
-                    success: true,
-                    message: "No record found."
-                });
-            }
-          });
+        //     } else {
+        //         res.status(404).json({
+        //             success: true,
+        //             message: "No record found."
+        //         });
+        //     }
+        //   });
 
         
     } catch (err) {

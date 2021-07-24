@@ -15,9 +15,9 @@ db.once('open', async function callback() {
     console.log("Connection with database succeeded.");
 });
 
-const redisClient = require('redis').createClient;
-const redis = redisClient(6379, '127.0.0.1');
+// const redisClient = require('redis').createClient;
+// const redis = redisClient(6379, '127.0.0.1');
 
-module.exports.redis = redis
+// module.exports.redis = redis
 module.exports.Mongoose = Mongoose;
 module.exports.db = db;
