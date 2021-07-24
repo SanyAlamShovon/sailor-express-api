@@ -1,9 +1,13 @@
 const Mongoose = require('mongoose');
 Mongoose.set('useCreateIndex', true);
 Mongoose.set('useFindAndModify', false);
-Mongoose.connect('mongodb://' + process.env.DBUserName + ':' + process.env.DBPassword + '@' + process.env.DBUrl + '/' + process.env.DatabaseName,{ useNewUrlParser: true });
-// Mongoose.connect("mongodb://admin:jmc123@ds059546.mlab.com:59546/jmcf",{ useNewUrlParser: true });
 
+const DB_USER = 'sany';
+const PASSWORD = encodeURIComponent('sanyalam@123'); 
+
+//Mongoose.connect('mongodb://' + process.env.DBUserName + ':' + process.env.DBPassword + '@' + process.env.DBUrl + '/' + process.env.DatabaseName,{ useNewUrlParser: true });
+// Mongoose.connect("mongodb://admin:jmc123@ds059546.mlab.com:59546/jmcf",{ useNewUrlParser: true });
+Mongoose.connect('mongodb+srv://sailor-user:sailor-user123@sailor-cluster.woawp.mongodb.net/sailor-express?retryWrites=true&w=majority')
 const db = Mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error'));
